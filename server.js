@@ -10,7 +10,7 @@
 
     // configuration =================
 
-    mongoose.connect('mongodb://<user>:<pass>@proximus.modulusmongo.net:27017/tisadE2j');     // connect to mongoDB database on modulus.io
+    mongoose.connect('mongodb://person:person@proximus.modulusmongo.net:27017/Q4oqysiz');     // connect to mongoDB database on modulus.io
 
     app.use(express.static(__dirname + '/public'));                 // set the static files location /public/img will be /img for users
     app.use(morgan('dev'));                                         // log every request to the console
@@ -22,7 +22,11 @@
 
     // define model =================
     var Todo = mongoose.model('Todo', {
-        text : String
+        text : String,
+        random: {
+            type: Number,
+            default: Math.random()
+        }
     });
 
 
@@ -33,17 +37,49 @@
 // routes ======================================================================
 
     // api ---------------------------------------------------------------------
+
+    app.get('/api', function(req, res) {
+        res.send(200, {
+            'success': true,
+            'data': 'ok'
+        });
+    });
+
     // get all todos
     app.get('/api/todos', function(req, res) {
-
         // use mongoose to get all todos in the database
-        Todo.find(function(err, todos) {
+        Todo.find().exec(function(err, todos) {
 
             // if there is an error retrieving, send the error. nothing after res.send(err) will execute
-            if (err)
-                res.send(err)
+            if (err) {
+                console.log('Error: %s', err);
+                return res.send(err);
+            }
+            
+            if (!todos) {
+                console.log('No Todos');
+                return res.send(400, {
+                    'success': false,
+                    'data': 'No Todos'
+                });
+            }
+            
+            console.log('Found Todos');
+            res.send(200, {
+                'success': true,
+                'todo': todos
+            });
+        });
+    });
 
-            res.json(todos); // return all todos in JSON format
+    app.get('/api/todos/single', function(req, res) {
+        var rand = Math.random();
+        Todo.findOne({random: {$gte: rand}}, function(err, todo) {
+            if (err) {
+                return res.send(err);
+            }
+            
+            res.send(todo);
         });
     });
 

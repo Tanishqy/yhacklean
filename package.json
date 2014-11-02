@@ -4,6 +4,9 @@
   "version"      : "0.0.0",
   "description"  : "Simple todo application.",
   "main"         : "server.js",
+ "scripts": {
+     "start": "nodemon server.js"
+ },
   "author"       : "Scotch",
   "dependencies" : {
     "express"    : "~4.7.2",
